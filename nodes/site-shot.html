@@ -1,0 +1,171 @@
+<script type="text/javascript">
+(function () {
+    function optionalWholeNumber(min, max) {
+        return function (value) {
+            var text = String(value === undefined || value === null ? '' : value).trim();
+            return text === '' || (/^\d+$/.test(text) && Number(text) >= min && Number(text) <= max);
+        };
+    }
+
+    RED.nodes.registerType('site-shot-account', {
+        category: 'config',
+        defaults: {
+            name: { value: '' }
+        },
+        credentials: {
+            apiKey: { type: 'password' }
+        },
+        label: function () {
+            return this.name || 'Site-Shot account';
+        }
+    });
+
+    RED.nodes.registerType('site-shot-screenshot', {
+        category: 'network',
+        color: '#7FB3D5',
+        defaults: {
+            name: { value: '' },
+            account: { value: '', type: 'site-shot-account', required: true },
+            url: { value: 'payload', required: true, validate: RED.validators.typedInput('urlType') },
+            urlType: { value: 'msg' },
+            format: { value: 'png', validate: function (value) { return value === 'png' || value === 'jpeg'; } },
+            fullPage: { value: false },
+            width: { value: '', validate: optionalWholeNumber(100, 8000) },
+            height: { value: '', validate: optionalWholeNumber(100, 20000) },
+            maxHeight: { value: '', validate: optionalWholeNumber(100, 20000) }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'font-awesome/fa-camera',
+        paletteLabel: 'site-shot',
+        label: function () {
+            return this.name || 'site-shot';
+        },
+        oneditprepare: function () {
+            $('#node-input-url').typedInput({ types: ['msg', 'str'], typeField: '#node-input-urlType' });
+            $('#node-input-fullPage').on('change', function () {
+                $('#site-shot-max-height-row').toggle($(this).is(':checked'));
+            }).trigger('change');
+        }
+    });
+})();
+</script>
+
+<script type="text/html" data-template-name="site-shot-account">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Site-Shot account">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-apiKey"><i class="fa fa-key"></i> API key</label>
+        <input type="password" id="node-config-input-apiKey" autocomplete="off">
+    </div>
+    <div class="form-tips">The key is a Node-RED credential: it is not saved in the flow and never leaves this runtime except in capture requests to api.site-shot.com. Saving it does not contact Site-Shot.</div>
+</script>
+
+<script type="text/html" data-help-name="site-shot-account">
+<p>The API key that Site-Shot screenshot nodes use.</p>
+<h3>Details</h3>
+<p>Copy the API key from your <a href="https://www.site-shot.com/dashboard/">Site-Shot dashboard</a>. A paid Site-Shot plan is required; the API has no free captures.</p>
+<p>The key is a Node-RED credential: it is kept in the runtime's credentials file, separately from the flow, and is never part of an exported flow. Saving it does not contact Site-Shot, so the first capture is what shows whether the key works.</p>
+</script>
+
+<script type="text/html" data-template-name="site-shot-screenshot">
+    <div class="form-row">
+        <label for="node-input-account"><i class="fa fa-user"></i> Account</label>
+        <input type="text" id="node-input-account">
+    </div>
+    <div class="form-row">
+        <label for="node-input-url"><i class="fa fa-globe"></i> URL</label>
+        <input type="text" id="node-input-url" style="width: 70%;">
+        <input type="hidden" id="node-input-urlType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-file-image-o"></i> Format</label>
+        <select id="node-input-format">
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-fullPage"><i class="fa fa-arrows-v"></i> Full page</label>
+        <input type="checkbox" id="node-input-fullPage" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-fullPage" style="width: auto;">Capture the whole scrollable page</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-width"><i class="fa fa-arrows-h"></i> Width</label>
+        <input type="text" id="node-input-width" placeholder="1024">
+    </div>
+    <div class="form-row">
+        <label for="node-input-height"><i class="fa fa-arrows-v"></i> Height</label>
+        <input type="text" id="node-input-height" placeholder="768">
+    </div>
+    <div class="form-row" id="site-shot-max-height-row">
+        <label for="node-input-maxHeight"><i class="fa fa-arrows-v"></i> Max height</label>
+        <input type="text" id="node-input-maxHeight" placeholder="20000">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="site-shot">
+    </div>
+    <div class="form-tips">Every message is one capture and counts toward your Site-Shot plan.</div>
+</script>
+
+<script type="text/html" data-help-name="site-shot-screenshot">
+<p>Captures a public web page as a PNG or JPEG screenshot with the Site-Shot API.</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>payload <span class="property-type">string</span></dt>
+    <dd>the address of the page, such as <code>https://www.example.com/</code>. This is the default <b>URL</b> setting; the node can read another message property, or use a fixed address, instead.</dd>
+</dl>
+<h3>Outputs</h3>
+<dl class="message-properties">
+    <dt>payload <span class="property-type">buffer</span></dt>
+    <dd>the screenshot: the bytes of a PNG or JPEG image, ready for a <b>write file</b> node.</dd>
+    <dt>siteshot <span class="property-type">object</span></dt>
+    <dd>about the capture: <code>url</code> (the address as sent), <code>format</code>, <code>contentType</code>, <code>fullPage</code>, <code>width</code>, <code>height</code> and <code>maxHeight</code> (only those set in the node), <code>bytes</code> and <code>capturedAt</code> (an ISO 8601 time).</dd>
+</dl>
+<p>Every other message property, such as <code>topic</code> or <code>parts</code>, is passed on unchanged.</p>
+<h3>Details</h3>
+<p>The node needs a <b>Site-Shot account</b> with the API key of a paid plan. Every message is one capture and counts toward the plan, including a capture that fails while the page is rendered.</p>
+<p><b>URL</b> must be the full address of a public page, starting with <code>http://</code> or <code>https://</code>. An address without a scheme, with a user name or password, or on a local or private network is rejected before anything is sent.</p>
+<p><b>Format</b> is PNG or JPEG. With <b>Full page</b>, the whole scrollable page is captured, up to <b>Max height</b>; otherwise the visible viewport is. <b>Width</b> (100 to 8000), <b>Height</b> and <b>Max height</b> (100 to 20000) are in pixels. Left empty, Site-Shot uses 1024, 768 and 20000.</p>
+<p>The node captures one page at a time. Messages that arrive meanwhile wait in order, up to 1000; further messages are rejected. A capture that gets no answer within 120 seconds fails; the <code>siteShotScreenshotTimeout</code> runtime setting changes this limit, in milliseconds. A screenshot larger than 64 MiB is rejected.</p>
+<p>When the node is stopped or redeployed, the capture in flight is cancelled, though Site-Shot may still finish it and count it, and the waiting messages are not captured. Each of them fails with <code>SITE_SHOT_CANCELLED</code>, so it never triggers a <b>Complete</b> node.</p>
+<p>A failed capture sends no message. Its error goes to a <b>Catch</b> node, with <code>msg.error.code</code> set to one of:</p>
+<dl class="message-properties">
+    <dt>SITE_SHOT_INVALID_URL</dt>
+    <dd>the URL was rejected before anything was sent.</dd>
+    <dt>SITE_SHOT_SETTINGS</dt>
+    <dd>a node setting is invalid, or the account or its API key is missing.</dd>
+    <dt>SITE_SHOT_HTTP_401</dt>
+    <dd>Site-Shot did not accept the API key.</dd>
+    <dt>SITE_SHOT_HTTP_403</dt>
+    <dd>the plan is inactive or out of captures, no capture worker is free, or the address is not allowed.</dd>
+    <dt>SITE_SHOT_HTTP_404</dt>
+    <dd>the page could not be captured; the placeholder image Site-Shot sends with this answer is discarded.</dd>
+    <dt>SITE_SHOT_HTTP_429</dt>
+    <dd>the plan's limit of captures at the same time was reached, for example by other nodes or apps using the same key.</dd>
+    <dt>SITE_SHOT_HTTP_<i>status</i></dt>
+    <dd>any other HTTP status, such as a server error or a redirect, which is not followed.</dd>
+    <dt>SITE_SHOT_NOT_AN_IMAGE</dt>
+    <dd>the answer did not have the content type and the first bytes of an image in the chosen format.</dd>
+    <dt>SITE_SHOT_TOO_LARGE</dt>
+    <dd>the screenshot was larger than 64 MiB.</dd>
+    <dt>SITE_SHOT_TIMEOUT</dt>
+    <dd>no answer arrived within the time limit.</dd>
+    <dt>SITE_SHOT_NETWORK</dt>
+    <dd>the Site-Shot API could not be reached.</dd>
+    <dt>SITE_SHOT_QUEUE_FULL</dt>
+    <dd>1000 messages were already waiting.</dd>
+    <dt>SITE_SHOT_CANCELLED</dt>
+    <dd>the node was stopped or redeployed before the capture finished or started.</dd>
+</dl>
+<p>Failed captures are not retried, because each attempt can count toward the plan.</p>
+<p>The API key is sent only to <code>https://api.site-shot.com/</code>, as the <code>userkey</code> query parameter that the capture API requires. Error messages and the node status never include it.</p>
+<h3>References</h3>
+<ul>
+    <li><a href="https://www.site-shot.com/">Site-Shot</a> - plans and API keys</li>
+    <li><a href="https://www.site-shot.com/openapi-capture.json">Capture API description</a> (OpenAPI)</li>
+</ul>
+</script>

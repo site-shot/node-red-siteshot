@@ -1,0 +1,41 @@
+{
+  "name": "@site-shot/node-red-siteshot",
+  "version": "0.1.0",
+  "description": "Node-RED node that captures a public web page as a PNG or JPEG screenshot with the Site-Shot API.",
+  "license": "MIT",
+  "homepage": "https://www.site-shot.com/",
+  "keywords": [
+    "node-red",
+    "screenshot",
+    "website screenshot",
+    "site-shot"
+  ],
+  "engines": {
+    "node": ">=22.9"
+  },
+  "files": [
+    "nodes",
+    "examples"
+  ],
+  "node-red": {
+    "version": ">=5.0.0",
+    "nodes": {
+      "site-shot": "nodes/site-shot.js"
+    }
+  },
+  "scripts": {
+    "test": "node --require ./test/support/no-network.js --test --test-concurrency=1 \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "node-red": "5.0.8",
+    "node-red-node-test-helper": "0.3.6",
+    "undici": "7.16.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/site-shot/node-red-siteshot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/site-shot/node-red-siteshot/issues"
+  }
+}

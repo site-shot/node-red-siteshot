@@ -1,0 +1,154 @@
+[
+    {
+        "id": "e5b1d8a26f3c9047",
+        "type": "comment",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "Capture a list of pages to files, one after another",
+        "info": "Click the button on the inject node to capture every page in its list once. Nothing runs when the flow is deployed or Node-RED starts.\n\n1. Open the **Site-Shot account** node and enter your API key. It is kept as a Node-RED credential and is never part of an exported flow.\n2. In the inject node, replace the example addresses with the public pages you want to capture.\n3. Deploy, then click the button on the inject node.\n\n**Paid captures.** Site-Shot needs a paid plan. Every address in the list is one capture and counts toward the plan, including a capture that fails while the page is rendered: the example list is three captures per click.\n\n**One at a time.** The split node turns the list into one message per address. The site-shot node captures them one after another, in list order; up to 1000 wait their turn, and addresses beyond that fail with `SITE_SHOT_QUEUE_FULL`.\n\n**Files.** Each screenshot is written to the `site-shot` folder in Node-RED's working directory: the `fileWorkingDirectory` setting, or else the directory Node-RED was started from. Every file gets a new name from the time and the message id, so no file is overwritten. The debug sidebar shows each address with its file name.\n\n**Failures.** An address that fails writes no file and is not retried, and the rest of the list goes on. The catch node passes it to the debug sidebar with the address in `msg.payload` and the reason in `msg.error.code`; the site-shot node's help lists the codes.\n\n**Schedule.** To capture the list regularly instead, set **Repeat** in the inject node. Each run is another paid capture of every address.",
+        "x": 250,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "3a8c6e1f9d4b7025",
+        "type": "inject",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "pages to capture",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "[\"https://www.example.com/\",\"https://www.example.org/\",\"https://www.example.net/\"]",
+        "payloadType": "json",
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "b7e2a5d93c1f6048"
+            ]
+        ]
+    },
+    {
+        "id": "b7e2a5d93c1f6048",
+        "type": "split",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "one address per message",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "f19d4c7a2e6b8053"
+            ]
+        ]
+    },
+    {
+        "id": "f19d4c7a2e6b8053",
+        "type": "site-shot-screenshot",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "",
+        "account": "d3a7f5b19c2e8460",
+        "url": "payload",
+        "urlType": "msg",
+        "format": "png",
+        "fullPage": false,
+        "width": "",
+        "height": "",
+        "maxHeight": "",
+        "x": 600,
+        "y": 140,
+        "wires": [
+            [
+                "64c3e9b8a1d27f05"
+            ]
+        ]
+    },
+    {
+        "id": "64c3e9b8a1d27f05",
+        "type": "file",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "write screenshot",
+        "filename": "\"site-shot/\" & $moment().format(\"YYYYMMDD-HHmmss\") & \"-\" & _msgid & \".\" & siteshot.format",
+        "filenameType": "jsonata",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 800,
+        "y": 140,
+        "wires": [
+            [
+                "0d5a9f3e7b2c4186"
+            ]
+        ]
+    },
+    {
+        "id": "0d5a9f3e7b2c4186",
+        "type": "debug",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "screenshot written",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "8b4f2d6a9e3c1075",
+        "type": "catch",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "capture or write failed",
+        "scope": [
+            "f19d4c7a2e6b8053",
+            "64c3e9b8a1d27f05"
+        ],
+        "uncaught": false,
+        "x": 210,
+        "y": 220,
+        "wires": [
+            [
+                "c6e8a2f4d1b97035"
+            ]
+        ]
+    },
+    {
+        "id": "c6e8a2f4d1b97035",
+        "type": "debug",
+        "z": "7d3f1a9c5e2b8064",
+        "name": "failure",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 430,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d3a7f5b19c2e8460",
+        "type": "site-shot-account",
+        "name": "Site-Shot account"
+    }
+]

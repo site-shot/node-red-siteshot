@@ -1,0 +1,134 @@
+[
+    {
+        "id": "8c6a3f1e2b7d4091",
+        "type": "comment",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "Capture one page to a file",
+        "info": "Click the button on the inject node to capture the page in its payload once. Nothing runs when the flow is deployed or Node-RED starts.\n\n1. Open the **Site-Shot account** node and enter your API key. It is kept as a Node-RED credential and is never part of an exported flow.\n2. In the inject node, replace `https://www.example.com/` with the public page you want to capture.\n3. Deploy, then click the button on the inject node.\n\n**Paid captures.** Site-Shot needs a paid plan. Every click is one capture and counts toward the plan, including a capture that fails while the page is rendered.\n\n**Files.** The screenshot is written to the `site-shot` folder in Node-RED's working directory: the `fileWorkingDirectory` setting, or else the directory Node-RED was started from. Every file gets a new name from the time and the message id, so no file is overwritten. The debug sidebar shows the file name.\n\n**Failures.** A failed capture writes no file and is not retried. The catch node passes it to the debug sidebar, where `msg.error.code` says what went wrong; the site-shot node's help lists the codes.\n\n**Schedule.** To capture the page regularly instead, set **Repeat** in the inject node. Each run is another paid capture.",
+        "x": 170,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "2f9b6d4c8e1a7035",
+        "type": "inject",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "https://www.example.com/",
+        "payloadType": "str",
+        "x": 180,
+        "y": 140,
+        "wires": [
+            [
+                "6e1c8a3d5b9f2047"
+            ]
+        ]
+    },
+    {
+        "id": "6e1c8a3d5b9f2047",
+        "type": "site-shot-screenshot",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "",
+        "account": "d3a7f5b19c2e8460",
+        "url": "payload",
+        "urlType": "msg",
+        "format": "png",
+        "fullPage": false,
+        "width": "",
+        "height": "",
+        "maxHeight": "",
+        "x": 410,
+        "y": 140,
+        "wires": [
+            [
+                "a4d82e6f1b7c3950"
+            ]
+        ]
+    },
+    {
+        "id": "a4d82e6f1b7c3950",
+        "type": "file",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "write screenshot",
+        "filename": "\"site-shot/\" & $moment().format(\"YYYYMMDD-HHmmss\") & \"-\" & _msgid & \".\" & siteshot.format",
+        "filenameType": "jsonata",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 610,
+        "y": 140,
+        "wires": [
+            [
+                "51f7c9e3a2d6b084"
+            ]
+        ]
+    },
+    {
+        "id": "51f7c9e3a2d6b084",
+        "type": "debug",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "screenshot written",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "c08e3b5a7f2d6194",
+        "type": "catch",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "capture or write failed",
+        "scope": [
+            "6e1c8a3d5b9f2047",
+            "a4d82e6f1b7c3950"
+        ],
+        "uncaught": false,
+        "x": 210,
+        "y": 220,
+        "wires": [
+            [
+                "97b4e1d6c3a85f20"
+            ]
+        ]
+    },
+    {
+        "id": "97b4e1d6c3a85f20",
+        "type": "debug",
+        "z": "4b2e9d7a1c3f5e80",
+        "name": "failure",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 430,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d3a7f5b19c2e8460",
+        "type": "site-shot-account",
+        "name": "Site-Shot account"
+    }
+]

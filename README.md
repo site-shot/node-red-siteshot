@@ -4,12 +4,12 @@ Node-RED nodes that capture a public web page as a PNG or JPEG screenshot with t
 
 ## Validation and distribution status
 
-Version 0.1.0, as of 2026-10-21:
+Version 0.1.0, as of 2026-10-22:
 
 - **Offline tests:** 98/98 passed independently on both Node.js 22.9.0 and 24.10.0 with Node-RED 5.0.8. These tests use a mocked Site-Shot API.
 - **Native editor:** the packed package installs, registers its nodes and imports its examples in Node-RED 5.0.8. API keys use Node-RED credential storage, not exported flow JSON.
 - **Live API:** three single manual requests through Node-RED 5.0.8 on Node.js 24.10.0 saved PNG viewport, JPEG viewport and full-page PNG images of `https://example.com/`. All three were decoded and visually inspected. The page was short (1280 x 800 in each result), so this does not demonstrate scrolling or stitching a long page. No retry was used.
-- **Distribution:** source is available under MIT. npm and the Node-RED Flow Library are not yet published/listed. This source publication is not Node-RED certification.
+- **Distribution:** the package is published on npm as `@site-shot/node-red-siteshot`; source is available under MIT. Node-RED Flow Library listing is a separate step. Publication is not Node-RED certification.
 
 ## Requirements
 
@@ -18,12 +18,15 @@ Version 0.1.0, as of 2026-10-21:
 
 ## Install
 
-Until the release, install from a tarball:
+In the Node-RED user directory, usually `~/.node-red`, run:
 
-1. In this directory, run `npm pack`. It writes `site-shot-node-red-siteshot-0.1.0.tgz`.
-2. In the Node-RED user directory, usually `~/.node-red`, run `npm install <path to the .tgz file>`, then restart Node-RED.
+```sh
+npm install @site-shot/node-red-siteshot
+```
 
-After the release, the package can be installed by name: with **Menu > Manage palette > Install** in the Node-RED editor once it is listed in the Node-RED Flow Library, or with `npm install @site-shot/node-red-siteshot` in the user directory once it is published on npm.
+Then restart Node-RED. Once the package is listed in the Node-RED Flow Library, you can also install it with **Menu > Manage palette > Install**.
+
+To install from source instead, run `npm pack` in this repository, then run `npm install <path to site-shot-node-red-siteshot-0.1.0.tgz>` in your Node-RED user directory and restart Node-RED.
 
 ## Get started
 

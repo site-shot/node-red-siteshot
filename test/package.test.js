@@ -152,6 +152,18 @@ describe('the editor', () => {
             assert.ok(help.includes(code), code);
         }
     });
+
+    it('sends users to the key page and describes the free plan, not a paid-only API', () => {
+        for (const [attribute, type] of [['data-help-name', 'site-shot-account'], ['data-template-name', 'site-shot-account'], ['data-help-name', 'site-shot-screenshot']]) {
+            const text = block(attribute, type);
+            assert.match(text, /href="https:\/\/www\.site-shot\.com\/start\/"/, `${attribute} ${type}`);
+            assert.match(text, /free plan includes 100 captures a month|free plan: 100 API captures a month/, `${attribute} ${type}`);
+            assert.doesNotMatch(text, /dashboard|paid plan is required|no free captures|of a paid plan/, `${attribute} ${type}`);
+        }
+        const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+        assert.match(readme, /https:\/\/www\.site-shot\.com\/start\//);
+        assert.doesNotMatch(readme, /from a paid Site-Shot plan|paid captures/);
+    });
 });
 
 describe('the runtime', () => {

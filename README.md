@@ -14,7 +14,7 @@ Version 0.1.0, as of 2026-10-22:
 ## Requirements
 
 - Node-RED 5.0 or later, on Node.js 22.9 or later. Node-RED recommends Node.js 24.
-- An API key from a paid Site-Shot plan. Every capture counts toward the plan.
+- A Site-Shot API key: get it at <https://www.site-shot.com/start/>. The key of an account with a confirmed email includes the free plan, 100 API captures a month with no card needed; paid plans start at $5 a month for 2,000 captures ([pricing](https://www.site-shot.com/pricing/)). Every capture counts toward the plan.
 
 ## Install
 
@@ -43,7 +43,7 @@ Import them with **Menu > Import > Examples > @site-shot/node-red-siteshot**:
 - **01 - Capture one page to a file**: one click captures one page and writes it to a new file.
 - **02 - Capture a list of pages to files**: one click captures every page in a list, one after another, each into its own file.
 
-Both write into a `site-shot` folder in the Node-RED working directory, under a new name for every screenshot, and show failures in the debug sidebar. Neither runs when it is deployed or when Node-RED starts: they capture only when their inject button is clicked. To capture on a schedule, set **Repeat** in the inject node; every run is more paid captures.
+Both write into a `site-shot` folder in the Node-RED working directory, under a new name for every screenshot, and show failures in the debug sidebar. Neither runs when it is deployed or when Node-RED starts: they capture only when their inject button is clicked. To capture on a schedule, set **Repeat** in the inject node; every run is more captures from your plan.
 
 ## Behaviour to know
 

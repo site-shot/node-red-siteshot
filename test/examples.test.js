@@ -101,7 +101,8 @@ describe('the example files', () => {
                 const caught = only(flow, 'catch');
                 assert.deepEqual(caught.scope, [screenshot.id, file.id]);
                 assert.equal(wiredFrom(flow, caught).type, 'debug');
-                assert.match(only(flow, 'comment').info, /paid plan/);
+                assert.match(only(flow, 'comment').info, /https:\/\/www\.site-shot\.com\/start\/; the free plan includes 100 captures a month/);
+                assert.doesNotMatch(only(flow, 'comment').info, /paid/i);
             });
         });
     }

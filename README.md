@@ -4,7 +4,7 @@ Node-RED nodes that capture a public web page as a PNG, JPEG or WebP screenshot 
 
 ## Requirements
 
-- Node-RED 4.0 or later, including 5.x, on Node.js 20.3 or later.
+- Node-RED 4.1 or later, including 5.x, on Node.js 20.3 or later.
 - A Site-Shot API key: get it at <https://www.site-shot.com/start/>. The key of an account with a confirmed email includes the free plan, 100 API captures a month with no card needed; paid plans start at $5 a month for 2,000 captures ([pricing](https://www.site-shot.com/pricing/)). Every capture counts toward the plan.
 
 ## Install
@@ -43,7 +43,7 @@ Both write into a `site-shot` folder in the Node-RED working directory (the `fil
 - **Page options.** Besides the format and the size, the node can remove cookie banners, block ads and wait a set delay after the page has loaded. WebP images are at most 16,383 pixels tall.
 - **One capture at a time per node**, in the order messages arrive. Up to 1000 messages wait their turn; more are refused.
 - **Limits.** A capture fails without an answer within 120 seconds, though Site-Shot may still finish it and count it, and a screenshot larger than 64 MiB is refused.
-- **Behind an HTTP proxy**, start Node-RED with the environment variable `NODE_USE_ENV_PROXY=1`, so that `HTTPS_PROXY` and `NO_PROXY` apply to the node's requests. This works on Node.js 24 and recent Node.js 22 releases, not on Node.js 20. The requests still go only to `https://api.site-shot.com/`.
+- **Behind an HTTP proxy**, start Node-RED with the environment variable `NODE_USE_ENV_PROXY=1`, so that `HTTPS_PROXY` and `NO_PROXY` apply to the node's requests. This works on Node.js 24 and on Node.js 22.21 or later, not on Node.js 20 or earlier Node.js 22 releases. The requests still go only to `https://api.site-shot.com/`.
 - **Stopping and redeploying** cancels the capture in flight, which Site-Shot may still finish and count, and the messages still waiting. Each of them fails with `SITE_SHOT_CANCELLED`, so it never triggers a Complete node.
 - **The API key** is sent only to `https://api.site-shot.com/`, in the `userkey` query parameter that the capture API requires. It is never part of a message, the node status, an error or a log entry.
 

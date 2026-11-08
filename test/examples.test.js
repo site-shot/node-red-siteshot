@@ -108,6 +108,8 @@ describe('the example files', () => {
                 // Docker users must learn that relative files land outside the /data volume.
                 assert.match(only(flow, 'comment').info, /`\/usr\/src\/node-red` inside the container, not the `\/data` volume/);
                 assert.match(only(flow, 'comment').info, /fileWorkingDirectory: '\/data'/);
+                // $fromMillis formats in UTC, unlike the local-time $moment the examples used before.
+                assert.match(only(flow, 'comment').info, /new name from the time \(in UTC\)/);
             });
         });
     }

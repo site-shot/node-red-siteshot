@@ -17,7 +17,7 @@ The node implements the image mode of the published capture API, <https://www.si
 - A failed capture is HTTP 404, with a PNG error card and no `Content-Type` header, or with an empty body; the node discards it.
 - HTTP 401 (unknown key) and HTTP 403 (no plan, or the free plan used up for the month) come from the gateway as JSON `{"message": "..."}`. For a 403 the node shows that message when it is one of the plan explanations (`PLAN_EXPLANATION` in the code), because it says when the free plan renews and links the paid plans; any other upstream text is never shown. A 403 can also be a PNG card, for an address Site-Shot must not capture.
 - HTTP 429 is the plan's limit of captures at the same time.
-- The endpoint is fixed in the code: the API key may only go to Site-Shot. There is no setting for another endpoint or a proxy; a proxy comes only from the environment, with `NODE_USE_ENV_PROXY=1` and `HTTPS_PROXY` (Node.js 22 and 24 honour them in the built-in `fetch`, Node.js 20 does not).
+- The endpoint is fixed in the code: the API key may only go to Site-Shot. There is no setting for another endpoint or a proxy; a proxy comes only from the environment, with `NODE_USE_ENV_PROXY=1` and `HTTPS_PROXY` (Node.js 22.21 and later and Node.js 24 honour them in the built-in `fetch`; Node.js 20 and Node.js 22.20 do not).
 
 ## Tests
 
@@ -28,7 +28,7 @@ npm test
 
 The tests use Node.js 24.10.0, whose `fetch` is undici 7.16.0, the version pinned in `devDependencies` for the request mock.
 
-The package supports Node-RED 4.0 and later on Node.js 20.3 and later (`AbortSignal.any` is the newest API the node uses). To run the suite against Node-RED 4, for example in the `nodered/node-red:4.1` image (Node.js 20), install `node-red@4.1.12 node-red-node-test-helper@0.3.6 undici@7.16.0` without saving and run `node --require ./test/support/no-network.js --test --test-concurrency=1 test/*.test.js` (Node.js 20 does not expand the quoted glob in `npm test`). Example flows must not use JSONata functions that older Node-RED 4 releases lack, such as `$moment`.
+The package supports Node-RED 4.1 and later on Node.js 20.3 and later (`AbortSignal.any` is the newest API the node uses). Node-RED 4.0 is not supported: it does not copy an error's `code` into `msg.error.code`, so Catch nodes could not tell the failures apart (Node-RED 4.0.9 fails 72 tests for that reason). On Node-RED 4.1.0 to 4.1.2 one test fails because of a Node-RED bug fixed in 4.1.3: after a deploy of modified nodes that replaces only the site-shot node, a Complete node that was not redeployed no longer fires for it until the next full deploy. To run the suite against Node-RED 4, for example in the `nodered/node-red:4.1` image (Node.js 20), install `node-red@4.1.12 node-red-node-test-helper@0.3.6 undici@7.16.0` without saving and run `node --require ./test/support/no-network.js --test --test-concurrency=1 test/*.test.js` (Node.js 20 does not expand the quoted glob in `npm test`). Example flows must not use JSONata functions that older Node-RED 4 releases lack, such as `$moment`.
 
 - Nothing in a test run can reach the network. `npm test` preloads `test/support/no-network.js` into every test process: it refuses TCP and TLS connections other than loopback, every DNS query, and UDP. Each test file asserts at the end that it refused nothing, so all requests went to the mock; `test/no-network.test.js` checks that the guard is loaded and works.
 - `test/support/site-shot-api.js` answers `https://api.site-shot.com` with an undici `MockAgent` and records every request.

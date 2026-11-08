@@ -84,8 +84,9 @@ describe('package.json', () => {
         }
     });
 
-    it('installs on Node-RED 4 and 5, on Node.js 20.3 or later (AbortSignal.any is the newest API the node uses)', () => {
-        assert.equal(pkg['node-red'].version, '>=4.0.0');
+    it('installs on Node-RED 4.1 and 5, on Node.js 20.3 or later (AbortSignal.any is the newest API the node uses)', () => {
+        // Node-RED 4.0 does not copy error.code into msg.error.code, which the Catch contract needs.
+        assert.equal(pkg['node-red'].version, '>=4.1.0');
         assert.equal(pkg.engines.node, '>=20.3');
         // The tests run on Node-RED 5 (the pinned devDependency) and on 4.x (see DEVELOPMENT.md).
         assert.match(nodeRed.version, /^[45]\./);
@@ -163,6 +164,10 @@ describe('the editor', () => {
             assert.match(text, /free plan includes 100 captures a month|free plan: 100 API captures a month/, `${attribute} ${type}`);
             assert.doesNotMatch(text, /dashboard|paid plan is required|no free captures|of a paid plan/, `${attribute} ${type}`);
         }
+        // Only the used-up free plan explanation carries a renewal date; a key with no plan gets the short message.
+        const help = block('data-help-name', 'site-shot-screenshot');
+        assert.doesNotMatch(help, /no plan or has used up/);
+        assert.match(help, /When the key has no plan, it is Site-Shot's short message <code>No active subscription found<\/code>/);
         const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
         assert.match(readme, /https:\/\/www\.site-shot\.com\/start\//);
         assert.doesNotMatch(readme, /from a paid Site-Shot plan|paid captures/);
@@ -174,6 +179,8 @@ describe('the editor', () => {
         for (const text of [help, readme]) {
             assert.match(text, /NODE_USE_ENV_PROXY=1/);
             assert.match(text, /HTTPS_PROXY/);
+            // Measured: Node.js 22.20.0 ignores NODE_USE_ENV_PROXY in fetch, 22.21.0 honours it.
+            assert.match(text, /Node\.js 22\.21 or later/);
         }
     });
 

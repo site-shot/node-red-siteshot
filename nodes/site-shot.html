@@ -160,7 +160,7 @@
     <dt>SITE_SHOT_HTTP_401</dt>
     <dd>Site-Shot did not accept the API key.</dd>
     <dt>SITE_SHOT_HTTP_403</dt>
-    <dd>the plan is inactive or out of captures, no capture worker is free, or the address is not allowed. When the key has no plan or has used up its free plan for the month, the error message is Site-Shot's own explanation, with the date the free plan renews and the link to the <a href="https://www.site-shot.com/pricing/">paid plans</a>.</dd>
+    <dd>the plan is inactive or out of captures, no capture worker is free, or the address is not allowed. When the key has used up its free plan for the month, the error message is Site-Shot's own explanation, with the date the free plan renews and the link to the <a href="https://www.site-shot.com/pricing/">paid plans</a>. When the key has no plan, it is Site-Shot's short message <code>No active subscription found</code>.</dd>
     <dt>SITE_SHOT_HTTP_404</dt>
     <dd>the page could not be captured; the placeholder image Site-Shot sends with this answer is discarded.</dd>
     <dt>SITE_SHOT_HTTP_429</dt>
@@ -174,7 +174,7 @@
     <dt>SITE_SHOT_TIMEOUT</dt>
     <dd>no answer arrived within the time limit.</dd>
     <dt>SITE_SHOT_NETWORK</dt>
-    <dd>the Site-Shot API could not be reached. Behind an HTTP proxy, start Node-RED with the environment variable <code>NODE_USE_ENV_PROXY=1</code> so that <code>HTTPS_PROXY</code> and <code>NO_PROXY</code> apply; this works on Node.js 24 and recent Node.js 22 releases, not on Node.js 20.</dd>
+    <dd>the Site-Shot API could not be reached. Behind an HTTP proxy, start Node-RED with the environment variable <code>NODE_USE_ENV_PROXY=1</code> so that <code>HTTPS_PROXY</code> and <code>NO_PROXY</code> apply; this works on Node.js 24 and on Node.js 22.21 or later, not on Node.js 20 or earlier Node.js 22 releases.</dd>
     <dt>SITE_SHOT_QUEUE_FULL</dt>
     <dd>1000 messages were already waiting.</dd>
     <dt>SITE_SHOT_CANCELLED</dt>

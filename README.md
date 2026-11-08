@@ -13,7 +13,7 @@ Version 0.1.0, as of 2026-10-22:
 
 ## Requirements
 
-- Node-RED 5.0 or later, on Node.js 22.9 or later. Node-RED recommends Node.js 24.
+- Node-RED 4.0 or later, including 5.x, on Node.js 20.3 or later.
 - A Site-Shot API key: get it at <https://www.site-shot.com/start/>. The key of an account with a confirmed email includes the free plan, 100 API captures a month with no card needed; paid plans start at $5 a month for 2,000 captures ([pricing](https://www.site-shot.com/pricing/)). Every capture counts toward the plan.
 
 ## Install

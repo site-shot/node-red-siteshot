@@ -26,6 +26,8 @@ npm test
 
 The tests use Node.js 24.10.0, whose `fetch` is undici 7.16.0, the version pinned in `devDependencies` for the request mock.
 
+The package supports Node-RED 4.0 and later on Node.js 20.3 and later (`AbortSignal.any` is the newest API the node uses). To run the suite against Node-RED 4, for example in the `nodered/node-red:4.1` image (Node.js 20), install `node-red@4.1.12 node-red-node-test-helper@0.3.6 undici@7.16.0` without saving and run `node --require ./test/support/no-network.js --test --test-concurrency=1 test/*.test.js` (Node.js 20 does not expand the quoted glob in `npm test`). Example flows must not use JSONata functions that older Node-RED 4 releases lack, such as `$moment`.
+
 - Nothing in a test run can reach the network. `npm test` preloads `test/support/no-network.js` into every test process: it refuses TCP and TLS connections other than loopback, every DNS query, and UDP. Each test file asserts at the end that it refused nothing, so all requests went to the mock; `test/no-network.test.js` checks that the guard is loaded and works.
 - `test/support/site-shot-api.js` answers `https://api.site-shot.com` with an undici `MockAgent` and records every request.
 - The images in `test/fixtures/` are synthetic, made with ImageMagick, and the API key in the tests is a dummy.

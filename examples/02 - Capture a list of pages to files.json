@@ -80,7 +80,7 @@
         "type": "file",
         "z": "7d3f1a9c5e2b8064",
         "name": "write screenshot",
-        "filename": "\"site-shot/\" & $moment().format(\"YYYYMMDD-HHmmss\") & \"-\" & _msgid & \".\" & siteshot.format",
+        "filename": "\"site-shot/\" & $fromMillis($millis(), \"[Y0001][M01][D01]-[H01][m01][s01]\") & \"-\" & _msgid & \".\" & siteshot.format",
         "filenameType": "jsonata",
         "appendNewline": false,
         "createDir": true,

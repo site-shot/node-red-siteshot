@@ -97,6 +97,8 @@ describe('the example files', () => {
                 const file = wiredFrom(flow, screenshot);
                 assert.equal(file.type, 'file');
                 assert.deepEqual([file.filenameType, file.overwriteFile, file.createDir, file.appendNewline, file.encoding], ['jsonata', 'true', true, false, 'none']);
+                // $moment exists only in Node-RED 5; on Node-RED 4 the file name fails with JSONata error T1006.
+                assert.doesNotMatch(file.filename, /\$moment/);
                 assert.equal(wiredFrom(flow, file).type, 'debug');
                 const caught = only(flow, 'catch');
                 assert.deepEqual(caught.scope, [screenshot.id, file.id]);

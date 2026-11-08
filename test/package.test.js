@@ -84,10 +84,11 @@ describe('package.json', () => {
         }
     });
 
-    it('needs Node-RED 5 and the Node.js versions Node-RED 5 itself needs', () => {
-        assert.equal(pkg['node-red'].version, '>=5.0.0');
-        assert.match(nodeRed.version, /^5\./);
-        assert.equal(pkg.engines.node, nodeRed.engines.node);
+    it('installs on Node-RED 4 and 5, on Node.js 20.3 or later (AbortSignal.any is the newest API the node uses)', () => {
+        assert.equal(pkg['node-red'].version, '>=4.0.0');
+        assert.equal(pkg.engines.node, '>=20.3');
+        // The tests run on Node-RED 5 (the pinned devDependency) and on 4.x (see DEVELOPMENT.md).
+        assert.match(nodeRed.version, /^[45]\./);
     });
 });
 

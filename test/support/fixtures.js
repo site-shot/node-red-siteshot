@@ -20,8 +20,10 @@ module.exports = {
     /** Like the image Site-Shot sends with a 403 or 404. */
     PLACEHOLDER_PNG: fixture('placeholder.png'),
     YELLOW_JPEG: fixture('yellow.jpg'),
+    PURPLE_WEBP: fixture('purple.webp'),
     PNG: { 'content-type': 'image/png' },
     JPEG: { 'content-type': 'image/jpeg' },
+    WEBP: { 'content-type': 'image/webp' },
     settle: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     /** Waits until `condition()` holds, for at most 3 seconds. */
     async until(condition, what) {

@@ -112,11 +112,12 @@ describe('the editor', () => {
         assert.equal(screenshot.outputs, 1);
         assert.equal(screenshot.label.call({ name: '' }), 'site-shot');
         const { defaults } = screenshot;
-        assert.deepEqual(Object.keys(defaults), ['name', 'account', 'url', 'urlType', 'format', 'fullPage', 'width', 'height', 'maxHeight']);
+        assert.deepEqual(Object.keys(defaults), ['name', 'account', 'url', 'urlType', 'format', 'fullPage', 'width', 'height', 'maxHeight', 'noCookiePopup', 'noAds', 'delay']);
         assert.deepEqual(plain(defaults.account), { value: '', type: 'site-shot-account', required: true });
         assert.deepEqual(plain(defaults.url), { value: 'payload', required: true, validate: { typedInputValidatorFor: 'urlType' } });
         assert.deepEqual([defaults.urlType.value, defaults.format.value, defaults.fullPage.value], ['msg', 'png', false]);
         assert.deepEqual([defaults.width.value, defaults.height.value, defaults.maxHeight.value], ['', '', '']);
+        assert.deepEqual([defaults.noCookiePopup.value, defaults.noAds.value, defaults.delay.value], [false, false, '']);
         const template = block('data-template-name', 'site-shot-screenshot');
         for (const name of Object.keys(defaults)) {
             assert.match(template, new RegExp(`id="node-input-${name}"`), name);
@@ -126,7 +127,8 @@ describe('the editor', () => {
     it('accepts the same format and sizes as the runtime', async () => {
         const { defaults } = editorDefinitions()['site-shot-screenshot'];
         const values = {
-            format: ['png', 'jpeg', 'PNG', 'gif', ''],
+            format: ['png', 'jpeg', 'webp', 'PNG', 'gif', ''],
+            delay: ['', '0', '60000', '2500', '60001', '-1', '1.5', 'soon'],
             width: ['', ' ', '100', '8000', ' 640 ', '99', '8001', '1.5', '640.5', '1e3', '-100', '0x10', 'wide'],
             height: ['', '100', '20000', '99', '20001', '7.5'],
             maxHeight: ['', '100', '20000', '99', '20001', 'all']

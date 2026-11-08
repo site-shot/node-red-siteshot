@@ -12,9 +12,18 @@ const { version } = require('../package.json');
 const API_ENDPOINT = 'https://api.site-shot.com/';
 const USER_AGENT = `node-red-siteshot/${version}`;
 
+/** Each format's content type, and the bytes its files start with: [offset, bytes] pairs. */
 const FORMATS = {
-    png: { label: 'PNG', contentType: 'image/png', signature: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]) },
-    jpeg: { label: 'JPEG', contentType: 'image/jpeg', signature: Buffer.from([0xff, 0xd8, 0xff]) }
+    png: { label: 'PNG', contentType: 'image/png', signature: [[0, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])]] },
+    jpeg: { label: 'JPEG', contentType: 'image/jpeg', signature: [[0, Buffer.from([0xff, 0xd8, 0xff])]] },
+    webp: { label: 'WebP', contentType: 'image/webp', signature: [[0, Buffer.from('RIFF')], [8, Buffer.from('WEBP')]] }
+};
+
+/** Optional page settings: their bounds and the query parameter each one sets. */
+const DELAY = { label: 'Delay', param: 'delay_time', min: 0, max: 60000 };
+const SWITCHES = {
+    noCookiePopup: { label: 'Remove cookie banners', param: 'no_cookie_popup' },
+    noAds: { label: 'Block ads', param: 'no_ads' }
 };
 
 /** Optional size settings: the published bounds and the query parameter each one sets. */
@@ -103,10 +112,19 @@ function readSettings(RED, config) {
         }
     }
     if (!Object.hasOwn(FORMATS, config.format)) {
-        throw settingsError('Format must be PNG or JPEG.');
+        throw settingsError('Format must be PNG, JPEG or WebP.');
     }
     if (config.fullPage !== undefined && typeof config.fullPage !== 'boolean') {
         throw settingsError('Full page must be true or false.');
+    }
+    const switches = [];
+    for (const [key, setting] of Object.entries(SWITCHES)) {
+        if (config[key] !== undefined && typeof config[key] !== 'boolean') {
+            throw settingsError(`${setting.label} must be true or false.`);
+        }
+        if (config[key] === true) {
+            switches.push(setting.param);
+        }
     }
     const fullPage = config.fullPage === true;
     const sizes = {};
@@ -121,6 +139,8 @@ function readSettings(RED, config) {
         format: config.format,
         fullPage,
         sizes,
+        switches,
+        delay: readSize(config.delay, DELAY),
         source: config.urlType === 'msg' ? `msg.${config.url}` : 'the node settings',
         timeoutMs: readTimeout(RED.settings.siteShotScreenshotTimeout)
     };
@@ -305,7 +325,7 @@ async function capture(requestUrl, format, signal) {
         }
         const image = await readBody(response.body);
         // An empty answer fails here too.
-        if (!image.subarray(0, expected.signature.length).equals(expected.signature)) {
+        if (!expected.signature.every(([offset, bytes]) => image.subarray(offset, offset + bytes.length).equals(bytes))) {
             throw notImage(format, 'other data');
         }
         return image;
@@ -379,6 +399,12 @@ module.exports = function (RED) {
             });
             for (const [name, value] of Object.entries(settings.sizes)) {
                 query.set(SIZES[name].param, String(value));
+            }
+            for (const param of settings.switches) {
+                query.set(param, '1');
+            }
+            if (settings.delay !== undefined) {
+                query.set(DELAY.param, String(settings.delay));
             }
             return { target, requestUrl: `${API_ENDPOINT}?${query}` };
         }

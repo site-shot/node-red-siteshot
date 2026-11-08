@@ -28,11 +28,14 @@
             account: { value: '', type: 'site-shot-account', required: true },
             url: { value: 'payload', required: true, validate: RED.validators.typedInput('urlType') },
             urlType: { value: 'msg' },
-            format: { value: 'png', validate: function (value) { return value === 'png' || value === 'jpeg'; } },
+            format: { value: 'png', validate: function (value) { return value === 'png' || value === 'jpeg' || value === 'webp'; } },
             fullPage: { value: false },
             width: { value: '', validate: optionalWholeNumber(100, 8000) },
             height: { value: '', validate: optionalWholeNumber(100, 20000) },
-            maxHeight: { value: '', validate: optionalWholeNumber(100, 20000) }
+            maxHeight: { value: '', validate: optionalWholeNumber(100, 20000) },
+            noCookiePopup: { value: false },
+            noAds: { value: false },
+            delay: { value: '', validate: optionalWholeNumber(0, 60000) }
         },
         inputs: 1,
         outputs: 1,
@@ -85,6 +88,7 @@
         <select id="node-input-format">
             <option value="png">PNG</option>
             <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
         </select>
     </div>
     <div class="form-row">
@@ -105,6 +109,20 @@
         <input type="text" id="node-input-maxHeight" placeholder="20000">
     </div>
     <div class="form-row">
+        <label for="node-input-noCookiePopup"><i class="fa fa-eye-slash"></i> Banners</label>
+        <input type="checkbox" id="node-input-noCookiePopup" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-noCookiePopup" style="width: auto;">Remove cookie banners</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-noAds"><i class="fa fa-ban"></i> Ads</label>
+        <input type="checkbox" id="node-input-noAds" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-noAds" style="width: auto;">Block ads</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-delay"><i class="fa fa-clock-o"></i> Delay (ms)</label>
+        <input type="text" id="node-input-delay" placeholder="500">
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="site-shot">
     </div>
@@ -112,7 +130,7 @@
 </script>
 
 <script type="text/html" data-help-name="site-shot-screenshot">
-<p>Captures a public web page as a PNG or JPEG screenshot with the Site-Shot API.</p>
+<p>Captures a public web page as a PNG, JPEG or WebP screenshot with the Site-Shot API.</p>
 <h3>Inputs</h3>
 <dl class="message-properties">
     <dt>payload <span class="property-type">string</span></dt>
@@ -121,7 +139,7 @@
 <h3>Outputs</h3>
 <dl class="message-properties">
     <dt>payload <span class="property-type">buffer</span></dt>
-    <dd>the screenshot: the bytes of a PNG or JPEG image, ready for a <b>write file</b> node.</dd>
+    <dd>the screenshot: the bytes of a PNG, JPEG or WebP image, ready for a <b>write file</b> node.</dd>
     <dt>siteshot <span class="property-type">object</span></dt>
     <dd>about the capture: <code>url</code> (the address as sent), <code>format</code>, <code>contentType</code>, <code>fullPage</code>, <code>width</code>, <code>height</code> and <code>maxHeight</code> (only those set in the node), <code>bytes</code> and <code>capturedAt</code> (an ISO 8601 time).</dd>
 </dl>
@@ -129,7 +147,8 @@
 <h3>Details</h3>
 <p>The node needs a <b>Site-Shot account</b> with an API key, which you get at <a href="https://www.site-shot.com/start/">site-shot.com/start</a>; the free plan includes 100 captures a month, no card needed. Every message is one capture and counts toward the plan, including a capture that fails while the page is rendered.</p>
 <p><b>URL</b> must be the full address of a public page, starting with <code>http://</code> or <code>https://</code>. An address without a scheme, with a user name or password, or on a local or private network is rejected before anything is sent.</p>
-<p><b>Format</b> is PNG or JPEG. With <b>Full page</b>, the whole scrollable page is captured, up to <b>Max height</b>; otherwise the visible viewport is. <b>Width</b> (100 to 8000), <b>Height</b> and <b>Max height</b> (100 to 20000) are in pixels. Left empty, Site-Shot uses 1024, 768 and 20000.</p>
+<p><b>Format</b> is PNG, JPEG or WebP. PNG and WebP are lossless, and WebP is usually smaller than PNG; JPEG is lossy and smallest on photo-heavy pages. A WebP image is at most 16,383 pixels tall, so a taller full-page WebP capture keeps only the top 16,383 pixels. With <b>Full page</b>, the whole scrollable page is captured, up to <b>Max height</b>; otherwise the visible viewport is. <b>Width</b> (100 to 8000), <b>Height</b> and <b>Max height</b> (100 to 20000) are in pixels. Left empty, Site-Shot uses 1024, 768 and 20000.</p>
+<p><b>Remove cookie banners</b> blocks cookie-consent banners, and <b>Block ads</b> blocks ads from the common ad networks. <b>Delay</b> is how long Site-Shot waits after the page has loaded before it captures, in milliseconds from 0 to 60000; left empty, Site-Shot waits 500 ms and waits longer for a slow host.</p>
 <p>The node captures one page at a time. Messages that arrive meanwhile wait in order, up to 1000; further messages are rejected. A capture that gets no answer within 120 seconds fails; the <code>siteShotScreenshotTimeout</code> runtime setting changes this limit, in milliseconds. A screenshot larger than 64 MiB is rejected.</p>
 <p>When the node is stopped or redeployed, the capture in flight is cancelled, though Site-Shot may still finish it and count it, and the waiting messages are not captured. Each of them fails with <code>SITE_SHOT_CANCELLED</code>, so it never triggers a <b>Complete</b> node.</p>
 <p>A failed capture sends no message. Its error goes to a <b>Catch</b> node, with <code>msg.error.code</code> set to one of:</p>

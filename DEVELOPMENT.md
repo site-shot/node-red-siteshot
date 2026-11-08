@@ -11,9 +11,9 @@ For maintainers. Users read the [README](README.md) and the node help in the edi
 
 ## The capture contract
 
-The node implements the image mode of the published capture API, <https://www.site-shot.com/openapi-capture.json>: `GET https://api.site-shot.com/` with `url`, `userkey`, `format` (`png` or `jpeg`), `response_type=image`, `full_size` (`1` or `0`), and optionally `width` (100 to 8000), `height` and `max_height` (100 to 20000; `max_height` only with `full_size=1`).
+The node implements the image mode of the published capture API, <https://www.site-shot.com/openapi-capture.json>: `GET https://api.site-shot.com/` with `url`, `userkey`, `format` (`png`, `jpeg` or `webp`), `response_type=image`, `full_size` (`1` or `0`), and optionally `width` (100 to 8000), `height` and `max_height` (100 to 20000; `max_height` only with `full_size=1`), `no_cookie_popup=1`, `no_ads=1` and `delay_time` (0 to 60000 ms). Country selection and per-message overrides are not offered yet.
 
-- Success is HTTP 200 with an `image/png` or `image/jpeg` body. The node passes an answer on only when it is HTTP 200, its content type is the chosen format's, and its first bytes are that format's signature. It does not decode the image, so a damaged image that starts correctly would pass.
+- Success is HTTP 200 with an `image/png`, `image/jpeg` or `image/webp` body. The node passes an answer on only when it is HTTP 200, its content type is the chosen format's, and its first bytes are that format's signature. It does not decode the image, so a damaged image that starts correctly would pass.
 - A failed capture comes with a placeholder image and HTTP 403 or 404; the node discards it. HTTP 401 means an unknown key, and HTTP 429 the plan's limit of captures at the same time.
 - The endpoint is fixed in the code: the API key may only go to Site-Shot. There is no setting for another endpoint or a proxy.
 

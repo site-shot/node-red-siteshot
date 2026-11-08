@@ -1,6 +1,6 @@
 # @site-shot/node-red-siteshot
 
-Node-RED nodes that capture a public web page as a PNG or JPEG screenshot with the [Site-Shot](https://www.site-shot.com/) API. The screenshot comes out of the node as a Buffer in `msg.payload`, ready for a **write file** node or any other node that takes binary data.
+Node-RED nodes that capture a public web page as a PNG, JPEG or WebP screenshot with the [Site-Shot](https://www.site-shot.com/) API. The screenshot comes out of the node as a Buffer in `msg.payload`, ready for a **write file** node or any other node that takes binary data.
 
 ## Requirements
 
@@ -40,6 +40,7 @@ Both write into a `site-shot` folder in the Node-RED working directory (the `fil
 
 - **One message, one capture.** A failed capture is reported to Catch nodes and is not retried, because every attempt can count toward the plan. Redirects are not followed.
 - **Public pages only.** An address must start with `http://` or `https://`. Addresses with a user name or password, and addresses on a local or private network such as `localhost` or `192.168.1.10`, are refused before anything is sent. The node does not resolve host names; Site-Shot refuses an address it must not capture.
+- **Page options.** Besides the format and the size, the node can remove cookie banners, block ads and wait a set delay after the page has loaded. WebP images are at most 16,383 pixels tall.
 - **One capture at a time per node**, in the order messages arrive. Up to 1000 messages wait their turn; more are refused.
 - **Limits.** A capture fails without an answer within 120 seconds, and a screenshot larger than 64 MiB is refused.
 - **Stopping and redeploying** cancels the capture in flight, which Site-Shot may still finish and count, and the messages still waiting. Each of them fails with `SITE_SHOT_CANCELLED`, so it never triggers a Complete node.

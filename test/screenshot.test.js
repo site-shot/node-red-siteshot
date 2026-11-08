@@ -10,7 +10,7 @@ const helper = require('node-red-node-test-helper');
 const NodePrototype = require('@node-red/runtime/lib/nodes/Node').prototype;
 const siteShotNodes = require('../nodes/site-shot.js');
 const { version } = require('../package.json');
-const { BLUE_PNG, GREEN_PNG, JPEG, KEY, PLACEHOLDER_PNG, PNG, RED_PNG, YELLOW_JPEG, settle, until } = require('./support/fixtures.js');
+const { BLUE_PNG, GREEN_PNG, JPEG, KEY, PLACEHOLDER_PNG, PNG, PURPLE_WEBP, RED_PNG, WEBP, YELLOW_JPEG, settle, until } = require('./support/fixtures.js');
 const { refusals } = require('./support/no-network.js');
 const { ORIGIN, SiteShotApi } = require('./support/site-shot-api.js');
 
@@ -157,6 +157,26 @@ describe('the capture request', () => {
         const { capturedAt, ...metadata } = run.outputs[0].siteshot;
         assert.deepEqual(metadata, {
             url: PAGE, format: 'jpeg', contentType: 'image/jpeg', fullPage: true, width: 1280, height: 800, maxHeight: 5000, bytes: YELLOW_JPEG.length
+        });
+    });
+
+    it('captures WebP, and carries cookie-banner removal, ad blocking and the delay when they are set', async () => {
+        await start({ format: 'webp', noCookiePopup: true, noAds: true, delay: '2500' });
+        api.reply({ status: 200, body: PURPLE_WEBP, headers: WEBP });
+        await capture({ payload: PAGE });
+        assert.deepEqual(Object.fromEntries(api.requests[0].url.searchParams), {
+            url: PAGE, userkey: KEY, format: 'webp', response_type: 'image', full_size: '0', no_cookie_popup: '1', no_ads: '1', delay_time: '2500'
+        });
+        assert.ok(run.outputs[0].payload.equals(PURPLE_WEBP));
+        assert.equal(run.outputs[0].siteshot.contentType, 'image/webp');
+    });
+
+    it('sends a delay of 0, and leaves the switches out when they are off', async () => {
+        await start({ noCookiePopup: false, noAds: false, delay: '0' });
+        api.reply({ status: 200, body: RED_PNG, headers: PNG });
+        await capture({ payload: PAGE });
+        assert.deepEqual(Object.fromEntries(api.requests[0].url.searchParams), {
+            url: PAGE, userkey: KEY, format: 'png', response_type: 'image', full_size: '0', delay_time: '0'
         });
     });
 
@@ -308,7 +328,11 @@ describe('bad input is refused before any request', () => {
         [{ height: 'tall' }, 'Height must be a whole number from 100 to 20000.'],
         [{ fullPage: true, maxHeight: '20001' }, 'Max height must be a whole number from 100 to 20000.'],
         [{ maxHeight: '99' }, 'Max height must be a whole number from 100 to 20000.'],
-        [{ format: 'gif' }, 'Format must be PNG or JPEG.'],
+        [{ format: 'gif' }, 'Format must be PNG, JPEG or WebP.'],
+        [{ noCookiePopup: 'true' }, 'Remove cookie banners must be true or false.'],
+        [{ noAds: 1 }, 'Block ads must be true or false.'],
+        [{ delay: '60001' }, 'Delay must be a whole number from 0 to 60000.'],
+        [{ delay: '-1' }, 'Delay must be a whole number from 0 to 60000.'],
         [{ fullPage: 'true' }, 'Full page must be true or false.'],
         [{ urlType: 'jsonata' }, 'URL must be a message property or a fixed address.'],
         [{ url: '' }, 'URL must not be empty.'],
@@ -445,7 +469,10 @@ describe('an answer that is not a screenshot is a failure, and is not retried', 
         ['HTML labelled as PNG', 'png', { body: '<html></html>', headers: PNG }],
         ['JPEG data labelled as PNG', 'png', { body: YELLOW_JPEG, headers: PNG }],
         ['a PNG when JPEG was asked for', 'jpeg', { body: RED_PNG, headers: PNG }],
-        ['PNG data labelled as JPEG', 'jpeg', { body: RED_PNG, headers: JPEG }]
+        ['PNG data labelled as JPEG', 'jpeg', { body: RED_PNG, headers: JPEG }],
+        ['PNG data labelled as WebP', 'webp', { body: RED_PNG, headers: WEBP }],
+        ['a RIFF file that is not WebP', 'webp', { body: Buffer.concat([PURPLE_WEBP.subarray(0, 8), Buffer.from('WAVE'), PURPLE_WEBP.subarray(12)]), headers: WEBP }],
+        ['a WebP when PNG was asked for', 'png', { body: PURPLE_WEBP, headers: WEBP }]
     ];
     for (const [what, format, answer] of notImages) {
         it(`HTTP 200 with ${what} fails with SITE_SHOT_NOT_AN_IMAGE`, async () => {

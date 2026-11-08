@@ -2,15 +2,6 @@
 
 Node-RED nodes that capture a public web page as a PNG or JPEG screenshot with the [Site-Shot](https://www.site-shot.com/) API. The screenshot comes out of the node as a Buffer in `msg.payload`, ready for a **write file** node or any other node that takes binary data.
 
-## Validation and distribution status
-
-Version 0.1.0, as of 2026-10-22:
-
-- **Offline tests:** 98/98 passed independently on both Node.js 22.9.0 and 24.10.0 with Node-RED 5.0.8. These tests use a mocked Site-Shot API.
-- **Native editor:** the packed package installs, registers its nodes and imports its examples in Node-RED 5.0.8. API keys use Node-RED credential storage, not exported flow JSON.
-- **Live API:** three single manual requests through Node-RED 5.0.8 on Node.js 24.10.0 saved PNG viewport, JPEG viewport and full-page PNG images of `https://example.com/`. All three were decoded and visually inspected. The page was short (1280 x 800 in each result), so this does not demonstrate scrolling or stitching a long page. No retry was used.
-- **Distribution:** the package is published on npm as `@site-shot/node-red-siteshot`; source is available under MIT. Node-RED Flow Library listing is a separate step. Publication is not Node-RED certification.
-
 ## Requirements
 
 - Node-RED 4.0 or later, including 5.x, on Node.js 20.3 or later.
@@ -18,19 +9,19 @@ Version 0.1.0, as of 2026-10-22:
 
 ## Install
 
-In the Node-RED user directory, usually `~/.node-red`, run:
+In the Node-RED editor, open **Menu > Manage palette > Install**, search for `site-shot` and install **@site-shot/node-red-siteshot**.
+
+Or, in the Node-RED user directory, usually `~/.node-red`, run the following and restart Node-RED:
 
 ```sh
 npm install @site-shot/node-red-siteshot
 ```
 
-Then restart Node-RED. Once the package is listed in the Node-RED Flow Library, you can also install it with **Menu > Manage palette > Install**.
-
 To install from source instead, run `npm pack` in this repository, then run `npm install <path to site-shot-node-red-siteshot-0.1.0.tgz>` in your Node-RED user directory and restart Node-RED.
 
 ## Get started
 
-1. Drag a **site-shot** node from the network category into a flow. In its **Account** field, add a **Site-Shot account** and paste your API key into it. The key is a Node-RED credential: it is not saved in the flow, never exported with it, and saving it does not contact Site-Shot.
+1. Drag a **site-shot** node from the network category into a flow. In its **Account** field, add a **Site-Shot account** and paste your API key into it; you find the key at <https://www.site-shot.com/start/>. The key is a Node-RED credential: it is not saved in the flow, never exported with it, and saving it does not contact Site-Shot.
 2. Send the node a message whose `msg.payload` is the address of a public page, such as `https://www.example.com/`. The node can also read the address from another message property, or use a fixed one.
 3. Wire the node's output to a **write file** node, or to any node that takes a Buffer.
 

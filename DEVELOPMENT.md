@@ -48,10 +48,14 @@ The tests run the nodes in the runtime, but not the editor's loading of the pack
 4. Check `GET /nodes` (JSON and HTML), `GET /library/examples/flows/@site-shot/node-red-siteshot/`, and a deploy of the examples with a dummy key: the key must not appear in `GET /flows`, `flows.json` or `flows_cred.json`. Do not click the inject nodes.
 5. Stop Node-RED and delete the directory.
 
+## Checks of past releases
+
+Version 0.1.0 (2026-10-22): the offline tests passed on Node.js 22.9.0 and 24.10.0 with Node-RED 5.0.8; the packed package installed, registered its nodes and imported its examples in Node-RED 5.0.8; and three manual captures of `https://example.com/` through Node-RED 5.0.8 (PNG viewport, JPEG viewport, full-page PNG) were decoded and inspected. That page is short, so they did not show a long page being scrolled.
+
 ## Releasing
 
 Releasing is up to the owner of the Site-Shot npm scope, in this order:
 
 1. Capture a public test page with a real key in a real Node-RED, with both formats, viewport and full page, and an error case. The tests above never contact Site-Shot.
-2. Set the version, bring the status and install sections of the README up to date, run `npm test`, check `npm pack --dry-run`, and publish with `npm publish --access public` from an account of the `@site-shot` npm scope, with two-factor authentication.
+2. Set the version, bring the README up to date (it is the npm and Flow Library page; keep test records here, not there), add the release's checks to the section above, run `npm test`, check `npm pack --dry-run`, and publish with `npm publish --access public` from an account of the `@site-shot` npm scope, with two-factor authentication.
 3. The Node-RED Flow Library does not pick up new packages by itself: submit the package at <https://flows.nodered.org/add/node> and meet the requirements listed there. `package.json` has no `repository` field yet, because the source has no public repository yet.

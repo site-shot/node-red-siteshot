@@ -165,6 +165,13 @@ describe('the editor', () => {
         assert.match(readme, /https:\/\/www\.site-shot\.com\/start\//);
         assert.doesNotMatch(readme, /from a paid Site-Shot plan|paid captures/);
     });
+
+    it('has a README for users: palette install first, no test records or stale listing notes', () => {
+        const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+        const install = readme.slice(readme.indexOf('## Install'));
+        assert.match(install, /^## Install\n\nIn the Node-RED editor, open \*\*Menu > Manage palette > Install\*\*/);
+        assert.doesNotMatch(readme, /Validation and distribution status|passed|No retry was used|Once the package is listed|Flow Library listing is a separate step|1280 x 800/);
+    });
 });
 
 describe('the runtime', () => {

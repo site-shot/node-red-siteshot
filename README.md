@@ -43,7 +43,7 @@ Import them with **Menu > Import > Examples > @site-shot/node-red-siteshot**:
 - **01 - Capture one page to a file**: one click captures one page and writes it to a new file.
 - **02 - Capture a list of pages to files**: one click captures every page in a list, one after another, each into its own file.
 
-Both write into a `site-shot` folder in the Node-RED working directory, under a new name for every screenshot, and show failures in the debug sidebar. Neither runs when it is deployed or when Node-RED starts: they capture only when their inject button is clicked. To capture on a schedule, set **Repeat** in the inject node; every run is more captures from your plan.
+Both write into a `site-shot` folder in the Node-RED working directory (the `fileWorkingDirectory` setting, or else the directory Node-RED was started from), under a new name for every screenshot, and show failures in the debug sidebar. In the official Docker image that directory is `/usr/src/node-red` inside the container, not the `/data` volume, so the files are lost when the container is recreated; set `fileWorkingDirectory: '/data'` in `settings.js` to keep them in `/data/site-shot`. Neither runs when it is deployed or when Node-RED starts: they capture only when their inject button is clicked. To capture on a schedule, set **Repeat** in the inject node; every run is more captures from your plan.
 
 ## Behaviour to know
 

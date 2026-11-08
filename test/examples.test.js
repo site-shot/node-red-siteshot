@@ -105,6 +105,9 @@ describe('the example files', () => {
                 assert.equal(wiredFrom(flow, caught).type, 'debug');
                 assert.match(only(flow, 'comment').info, /https:\/\/www\.site-shot\.com\/start\/; the free plan includes 100 captures a month/);
                 assert.doesNotMatch(only(flow, 'comment').info, /paid/i);
+                // Docker users must learn that relative files land outside the /data volume.
+                assert.match(only(flow, 'comment').info, /`\/usr\/src\/node-red` inside the container, not the `\/data` volume/);
+                assert.match(only(flow, 'comment').info, /fileWorkingDirectory: '\/data'/);
             });
         });
     }

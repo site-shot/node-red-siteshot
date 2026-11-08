@@ -160,11 +160,11 @@
     <dt>SITE_SHOT_HTTP_401</dt>
     <dd>Site-Shot did not accept the API key.</dd>
     <dt>SITE_SHOT_HTTP_403</dt>
-    <dd>the plan is inactive or out of captures, no capture worker is free, or the address is not allowed. When the key has used up its free plan for the month, the error message is Site-Shot's own explanation, with the date the free plan renews and the link to the <a href="https://www.site-shot.com/pricing/">paid plans</a>. When the key has no plan, it is Site-Shot's short message <code>No active subscription found</code>.</dd>
+    <dd>the plan is inactive or out of captures, or the address is not allowed. When the key has used up its free plan for the month, the error message is Site-Shot's own explanation, with the date the free plan renews and the link to the <a href="https://www.site-shot.com/pricing/">paid plans</a>. When the key has no plan, it is Site-Shot's short message <code>No active subscription found</code>.</dd>
     <dt>SITE_SHOT_HTTP_404</dt>
     <dd>the page could not be captured; the placeholder image Site-Shot sends with this answer is discarded.</dd>
     <dt>SITE_SHOT_HTTP_429</dt>
-    <dd>the plan's limit of captures at the same time was reached, for example by other nodes or apps using the same key.</dd>
+    <dd>the plan's limit of captures at the same time was reached (one at a time on the free plan), for example by other nodes or apps using the same key. The refused request does not count.</dd>
     <dt>SITE_SHOT_HTTP_<i>status</i></dt>
     <dd>any other HTTP status, such as a server error or a redirect, which is not followed.</dd>
     <dt>SITE_SHOT_NOT_AN_IMAGE</dt>

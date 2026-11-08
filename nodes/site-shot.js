@@ -204,13 +204,13 @@ function httpError(status, explanation) {
         return new SiteShotError('SITE_SHOT_HTTP_403', `Site-Shot refused the capture (HTTP 403): ${explanation}`, statusText);
     }
     if (status === 403) {
-        return new SiteShotError('SITE_SHOT_HTTP_403', 'Site-Shot refused the capture (HTTP 403): the plan may be inactive or out of captures, no capture worker may be free, or the address may not be allowed.', statusText);
+        return new SiteShotError('SITE_SHOT_HTTP_403', 'Site-Shot refused the capture (HTTP 403): the plan may be inactive or out of captures, or the address may not be allowed.', statusText);
     }
     if (status === 404) {
         return new SiteShotError('SITE_SHOT_HTTP_404', 'Site-Shot could not capture the page (HTTP 404): it may not have loaded, or its host name may not resolve. The placeholder image sent with this answer was discarded.', statusText);
     }
     if (status === 429) {
-        return new SiteShotError('SITE_SHOT_HTTP_429', 'Site-Shot refused the capture (HTTP 429): the plan\'s limit of captures at the same time was reached, for example by other nodes or apps using the same key. The capture was not retried.', statusText);
+        return new SiteShotError('SITE_SHOT_HTTP_429', 'Site-Shot refused the capture (HTTP 429): the plan\'s limit of captures at the same time was reached (one at a time on the free plan), for example by other nodes or apps using the same key. The capture was not retried and does not count.', statusText);
     }
     if (status >= 500) {
         return new SiteShotError(`SITE_SHOT_HTTP_${status}`, `Site-Shot or a gateway in front of it failed (HTTP ${status}). The capture was not retried.`, statusText);

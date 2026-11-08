@@ -28,6 +28,12 @@ const MAX_URL_LENGTH = 2048;
 const MAX_IMAGE_BYTES = 64 * 1024 * 1024;
 const MAX_WAITING = 1000;
 const DEFAULT_TIMEOUT_MS = 120000;
+/**
+ * The only upstream text the node shows: the explanations Site-Shot writes into an HTTP 403 when a key
+ * has no plan or has used up its free plan for the month (with the renewal date and the upgrade link).
+ */
+const PLAN_EXPLANATION = /^(Free plan used up|Free API trial used up|No active subscription)\b/;
+const MAX_EXPLANATION_BYTES = 4096;
 const MAX_TIMEOUT_MS = 600000;
 
 /** Addresses that are not on the public internet. IPv4-mapped IPv6 addresses match the IPv4 rules. */
@@ -45,7 +51,7 @@ const LOCAL_NAME = /(^|\.)(localhost|local|internal|home\.arpa)$/;
 
 /**
  * A failure that is safe to show and to hand to Catch nodes: the message is
- * our own text, never upstream text, the request URL or the API key. Node-RED
+ * our own text, never upstream text (except a PLAN_EXPLANATION), the request URL or the API key. Node-RED
  * copies `code` into `msg.error.code`; `statusText` is for the node status.
  */
 class SiteShotError extends Error {
@@ -166,13 +172,16 @@ function captureAddress(value, source) {
     return parsed.href;
 }
 
-function httpError(status) {
+function httpError(status, explanation) {
     const statusText = `HTTP ${status}`;
     if (status >= 300 && status < 400) {
         return new SiteShotError(`SITE_SHOT_HTTP_${status}`, `Site-Shot answered with a redirect (HTTP ${status}), which this node does not follow.`, statusText);
     }
     if (status === 401) {
         return new SiteShotError('SITE_SHOT_HTTP_401', 'Site-Shot did not accept the API key (HTTP 401). Check the key in the Site-Shot account node.', statusText);
+    }
+    if (status === 403 && explanation) {
+        return new SiteShotError('SITE_SHOT_HTTP_403', `Site-Shot refused the capture (HTTP 403): ${explanation}`, statusText);
     }
     if (status === 403) {
         return new SiteShotError('SITE_SHOT_HTTP_403', 'Site-Shot refused the capture (HTTP 403): the plan may be inactive or out of captures, no capture worker may be free, or the address may not be allowed.', statusText);
@@ -239,6 +248,41 @@ async function readBody(body) {
 }
 
 /**
+ * The plan explanation in an HTTP 403 body (Kong's JSON {"message": ...} or plain text), or '' when the body
+ * is anything else. Reads at most MAX_EXPLANATION_BYTES; a failure to read is not an explanation.
+ */
+async function planExplanation(response, key) {
+    const contentType = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+    if (response.body === null || (contentType !== 'application/json' && contentType !== 'text/plain')) {
+        return '';
+    }
+    let text;
+    try {
+        const chunks = [];
+        let size = 0;
+        for await (const chunk of response.body) {
+            size += chunk.byteLength;
+            if (size > MAX_EXPLANATION_BYTES) {
+                return '';
+            }
+            chunks.push(chunk);
+        }
+        text = Buffer.concat(chunks, size).toString('utf8');
+        if (contentType === 'application/json') {
+            const parsed = JSON.parse(text);
+            text = parsed !== null && typeof parsed.message === 'string' ? parsed.message : '';
+        }
+    } catch (error) {
+        return '';
+    }
+    text = text.replace(/\s+/g, ' ').trim();
+    if (!PLAN_EXPLANATION.test(text) || /[\u0000-\u001f\u007f]/.test(text) || (key !== '' && text.includes(key))) {
+        return '';
+    }
+    return text;
+}
+
+/**
  * One capture request. Resolves with the body of an HTTP 200 answer that has the content type and the
  * first bytes of the chosen format; rejects on any other answer. The image itself is not decoded.
  */
@@ -246,6 +290,9 @@ async function capture(requestUrl, format, signal) {
     const expected = FORMATS[format];
     const response = await fetch(requestUrl, { redirect: 'manual', signal, headers: { 'user-agent': USER_AGENT } });
     try {
+        if (response.status === 403) {
+            throw httpError(403, await planExplanation(response, new URL(requestUrl).searchParams.get('userkey') || ''));
+        }
         if (response.status !== 200) {
             throw httpError(response.status);
         }

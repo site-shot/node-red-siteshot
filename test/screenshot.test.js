@@ -386,6 +386,44 @@ describe('an answer that is not a screenshot is a failure, and is not retried', 
         });
     }
 
+    const FREE_PLAN_USED_UP = 'Free plan used up: 100 captures this month. It renews on 2026-12-01 (UTC). Paid plans start at $5 a month for 2,000 captures: https://www.site-shot.com/pricing/';
+    const JSON_TYPE = { 'content-type': 'application/json; charset=utf-8' };
+    const planAnswers = [
+        ['the free plan is used up (Kong JSON)', { body: JSON.stringify({ message: FREE_PLAN_USED_UP }), headers: JSON_TYPE }, FREE_PLAN_USED_UP],
+        ['the key has no plan (Kong JSON)', { body: '{"message":"No active subscription found"}', headers: JSON_TYPE }, 'No active subscription found'],
+        ['the free plan is used up (plain text)', { body: `${FREE_PLAN_USED_UP}\n`, headers: { 'content-type': 'text/plain' } }, FREE_PLAN_USED_UP]
+    ];
+    for (const [what, answer, explanation] of planAnswers) {
+        it(`HTTP 403 when ${what} passes on Site-Shot's explanation`, async () => {
+            await start();
+            api.reply({ status: 403, ...answer }, { times: 3 });
+            await capture({ payload: PAGE });
+            await settle(50);
+            assert.equal(api.requests.length, 1);
+            assert.equal(run.outputs.length, 0);
+            assert.equal(lastError().code, 'SITE_SHOT_HTTP_403');
+            assert.equal(lastError().message, `Error: Site-Shot refused the capture (HTTP 403): ${explanation}`);
+        });
+    }
+
+    const otherAnswers = [
+        ['an unknown JSON message', { body: '{"message":"Something else"}', headers: JSON_TYPE }],
+        ['a message that carries the key', { body: JSON.stringify({ message: `No active subscription found for ${KEY}` }), headers: JSON_TYPE }],
+        ['a body that is too long', { body: JSON.stringify({ message: `Free plan used up: ${'x'.repeat(5000)}` }), headers: JSON_TYPE }],
+        ['invalid JSON', { body: '{"message":"Free plan used up', headers: JSON_TYPE }],
+        ['an HTML page', { body: '<p>Free plan used up</p>', headers: { 'content-type': 'text/html' } }]
+    ];
+    for (const [what, answer] of otherAnswers) {
+        it(`HTTP 403 with ${what} keeps the node's own message`, async () => {
+            await start();
+            api.reply({ status: 403, ...answer });
+            await capture({ payload: PAGE });
+            assert.equal(lastError().code, 'SITE_SHOT_HTTP_403');
+            assert.match(lastError().message, /^Error: Site-Shot refused the capture \(HTTP 403\): the plan may be inactive/);
+            assert.ok(!lastError().message.includes(KEY));
+        });
+    }
+
     for (const status of [301, 302, 303, 307, 308]) {
         it(`an HTTP ${status} redirect is not followed`, async () => {
             await start();

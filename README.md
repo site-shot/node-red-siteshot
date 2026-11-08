@@ -17,7 +17,7 @@ Or, in the Node-RED user directory, usually `~/.node-red`, run the following and
 npm install @site-shot/node-red-siteshot
 ```
 
-To install from source instead, run `npm pack` in this repository, then run `npm install <path to site-shot-node-red-siteshot-0.1.0.tgz>` in your Node-RED user directory and restart Node-RED.
+To install from source instead, run `npm pack` in this repository, then run `npm install <path to site-shot-node-red-siteshot-0.2.0.tgz>` in your Node-RED user directory and restart Node-RED.
 
 ## Get started
 

@@ -52,6 +52,8 @@ The tests run the nodes in the runtime, but not the editor's loading of the pack
 
 ## Checks of past releases
 
+Version 0.2.0 (prepared 2026-11-08, not yet published): `npm test` 118/118 offline. The packed package installed and registered both node types in Node-RED 4.1.12 and 5.0.9 (official Docker images); a flow deployed through the Admin API with a real key captured `https://www.example.com/` as PNG and JPEG (1024 x 768), a full-page PNG of a Wikipedia article (1024 x 4009), and `https://www.bbc.com/` as WebP with cookie-banner and ad removal and a 1 s delay (no banner in the image); every file was checked by its signature and looked at. A host that does not resolve ended in `SITE_SHOT_HTTP_404` with the node's explanation.
+
 Version 0.1.0 (2026-10-22): the offline tests passed on Node.js 22.9.0 and 24.10.0 with Node-RED 5.0.8; the packed package installed, registered its nodes and imported its examples in Node-RED 5.0.8; and three manual captures of `https://example.com/` through Node-RED 5.0.8 (PNG viewport, JPEG viewport, full-page PNG) were decoded and inspected. That page is short, so they did not show a long page being scrolled.
 
 ## Releasing

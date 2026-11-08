@@ -1,6 +1,6 @@
 {
   "name": "@site-shot/node-red-siteshot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Node-RED node that captures a public web page as a PNG, JPEG or WebP screenshot with the Site-Shot API.",
   "license": "MIT",
   "homepage": "https://www.site-shot.com/",

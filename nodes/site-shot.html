@@ -149,7 +149,7 @@
 <p><b>URL</b> must be the full address of a public page, starting with <code>http://</code> or <code>https://</code>. An address without a scheme, with a user name or password, or on a local or private network is rejected before anything is sent.</p>
 <p><b>Format</b> is PNG, JPEG or WebP. PNG and WebP are lossless, and WebP is usually smaller than PNG; JPEG is lossy and smallest on photo-heavy pages. A WebP image is at most 16,383 pixels tall, so a taller full-page WebP capture keeps only the top 16,383 pixels. With <b>Full page</b>, the whole scrollable page is captured, up to <b>Max height</b>; otherwise the visible viewport is. <b>Width</b> (100 to 8000), <b>Height</b> and <b>Max height</b> (100 to 20000) are in pixels. Left empty, Site-Shot uses 1024, 768 and 20000.</p>
 <p><b>Remove cookie banners</b> blocks cookie-consent banners, and <b>Block ads</b> blocks ads from the common ad networks. <b>Delay</b> is how long Site-Shot waits after the page has loaded before it captures, in milliseconds from 0 to 60000; left empty, Site-Shot waits 500 ms and waits longer for a slow host.</p>
-<p>The node captures one page at a time. Messages that arrive meanwhile wait in order, up to 1000; further messages are rejected. A capture that gets no answer within 120 seconds fails; the <code>siteShotScreenshotTimeout</code> runtime setting changes this limit, in milliseconds. A screenshot larger than 64 MiB is rejected.</p>
+<p>The node captures one page at a time. Messages that arrive meanwhile wait in order, up to 1000; further messages are rejected. A capture that gets no answer within 120 seconds fails, though Site-Shot may still finish it and count it; the <code>siteShotScreenshotTimeout</code> runtime setting changes this limit, in milliseconds. A screenshot larger than 64 MiB is rejected.</p>
 <p>When the node is stopped or redeployed, the capture in flight is cancelled, though Site-Shot may still finish it and count it, and the waiting messages are not captured. Each of them fails with <code>SITE_SHOT_CANCELLED</code>, so it never triggers a <b>Complete</b> node.</p>
 <p>A failed capture sends no message. Its error goes to a <b>Catch</b> node, with <code>msg.error.code</code> set to one of:</p>
 <dl class="message-properties">
@@ -174,7 +174,7 @@
     <dt>SITE_SHOT_TIMEOUT</dt>
     <dd>no answer arrived within the time limit.</dd>
     <dt>SITE_SHOT_NETWORK</dt>
-    <dd>the Site-Shot API could not be reached.</dd>
+    <dd>the Site-Shot API could not be reached. Behind an HTTP proxy, start Node-RED with the environment variable <code>NODE_USE_ENV_PROXY=1</code> so that <code>HTTPS_PROXY</code> and <code>NO_PROXY</code> apply; this works on Node.js 24 and recent Node.js 22 releases, not on Node.js 20.</dd>
     <dt>SITE_SHOT_QUEUE_FULL</dt>
     <dd>1000 messages were already waiting.</dd>
     <dt>SITE_SHOT_CANCELLED</dt>

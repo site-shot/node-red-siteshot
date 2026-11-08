@@ -168,6 +168,15 @@ describe('the editor', () => {
         assert.doesNotMatch(readme, /from a paid Site-Shot plan|paid captures/);
     });
 
+    it('tells users behind an HTTP proxy how to reach Site-Shot', () => {
+        const help = block('data-help-name', 'site-shot-screenshot');
+        const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+        for (const text of [help, readme]) {
+            assert.match(text, /NODE_USE_ENV_PROXY=1/);
+            assert.match(text, /HTTPS_PROXY/);
+        }
+    });
+
     it('has a README for users: palette install first, no test records or stale listing notes', () => {
         const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
         const install = readme.slice(readme.indexOf('## Install'));

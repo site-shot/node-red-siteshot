@@ -14,7 +14,9 @@ For maintainers. Users read the [README](README.md) and the node help in the edi
 The node implements the image mode of the published capture API, <https://www.site-shot.com/openapi-capture.json>: `GET https://api.site-shot.com/` with `url`, `userkey`, `format` (`png`, `jpeg` or `webp`), `response_type=image`, `full_size` (`1` or `0`), and optionally `width` (100 to 8000), `height` and `max_height` (100 to 20000; `max_height` only with `full_size=1`), `no_cookie_popup=1`, `no_ads=1` and `delay_time` (0 to 60000 ms). Country selection and per-message overrides are not offered yet.
 
 - Success is HTTP 200 with an `image/png`, `image/jpeg` or `image/webp` body. The node passes an answer on only when it is HTTP 200, its content type is the chosen format's, and its first bytes are that format's signature. It does not decode the image, so a damaged image that starts correctly would pass.
-- A failed capture comes with a placeholder image and HTTP 403 or 404; the node discards it. HTTP 401 means an unknown key, and HTTP 429 the plan's limit of captures at the same time.
+- A failed capture is HTTP 404, with a PNG error card and no `Content-Type` header, or with an empty body; the node discards it.
+- HTTP 401 (unknown key) and HTTP 403 (no plan, or the free plan used up for the month) come from the gateway as JSON `{"message": "..."}`. For a 403 the node shows that message when it is one of the plan explanations (`PLAN_EXPLANATION` in the code), because it says when the free plan renews and links the paid plans; any other upstream text is never shown. A 403 can also be a PNG card, for an address Site-Shot must not capture.
+- HTTP 429 is the plan's limit of captures at the same time.
 - The endpoint is fixed in the code: the API key may only go to Site-Shot. There is no setting for another endpoint or a proxy; a proxy comes only from the environment, with `NODE_USE_ENV_PROXY=1` and `HTTPS_PROXY` (Node.js 22 and 24 honour them in the built-in `fetch`, Node.js 20 does not).
 
 ## Tests
@@ -58,4 +60,4 @@ Releasing is up to the owner of the Site-Shot npm scope, in this order:
 
 1. Capture a public test page with a real key in a real Node-RED, with both formats, viewport and full page, and an error case. The tests above never contact Site-Shot.
 2. Set the version, bring the README up to date (it is the npm and Flow Library page; keep test records here, not there), add the release's checks to the section above, run `npm test`, check `npm pack --dry-run`, and publish with `npm publish --access public` from an account of the `@site-shot` npm scope, with two-factor authentication.
-3. The Node-RED Flow Library does not pick up new packages by itself: submit the package at <https://flows.nodered.org/add/node> and meet the requirements listed there. `package.json` has no `repository` field yet, because the source has no public repository yet.
+3. The Node-RED Flow Library does not pick up new packages by itself: submit the package at <https://flows.nodered.org/add/node> and meet the requirements listed there. The package is listed there since 0.1.0; the listing picks up new versions from npm.

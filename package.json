@@ -1,13 +1,16 @@
 {
   "name": "@site-shot/node-red-siteshot",
-  "version": "0.1.0",
-  "description": "Node-RED node that captures a public web page as a PNG or JPEG screenshot with the Site-Shot API.",
+  "version": "0.1.1",
+  "description": "Website screenshot node for Node-RED: capture a public web page as a PNG or JPEG image with the Site-Shot screenshot API. Free plan: 100 captures a month.",
   "license": "MIT",
   "homepage": "https://www.site-shot.com/",
   "keywords": [
     "node-red",
     "screenshot",
     "website screenshot",
+    "web page screenshot",
+    "screenshot api",
+    "full page screenshot",
     "site-shot"
   ],
   "engines": {

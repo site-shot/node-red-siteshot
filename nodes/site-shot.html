@@ -66,7 +66,7 @@
 <script type="text/html" data-help-name="site-shot-account">
 <p>The API key that Site-Shot screenshot nodes use.</p>
 <h3>Details</h3>
-<p>Copy the API key from your <a href="https://www.site-shot.com/dashboard/">Site-Shot dashboard</a>. A paid Site-Shot plan is required; the API has no free captures.</p>
+<p>Get your API key at <a href="https://www.site-shot.com/start/">site-shot.com/start</a>. The key of an account with a confirmed email includes the free plan: 100 API captures a month, no card needed. Free-plan captures come only from the default location or the US, one at a time. Paid plans start at $5 a month for 2,000 captures; see <a href="https://www.site-shot.com/pricing/">pricing</a>.</p>
 <p>The key is a Node-RED credential: it is kept in the runtime's credentials file, separately from the flow, and is never part of an exported flow. Saving it does not contact Site-Shot, so the first capture is what shows whether the key works.</p>
 </script>
 
@@ -127,7 +127,7 @@
 </dl>
 <p>Every other message property, such as <code>topic</code> or <code>parts</code>, is passed on unchanged.</p>
 <h3>Details</h3>
-<p>The node needs a <b>Site-Shot account</b> with the API key of a paid plan. Every message is one capture and counts toward the plan, including a capture that fails while the page is rendered.</p>
+<p>The node needs a <b>Site-Shot account</b> with an API key, which you get at <a href="https://www.site-shot.com/start/">site-shot.com/start</a>; the free plan includes 100 captures a month, no card needed, and paid plans give more. Every message is one capture and counts toward the plan, including a capture that fails while the page is rendered.</p>
 <p><b>URL</b> must be the full address of a public page, starting with <code>http://</code> or <code>https://</code>. An address without a scheme, with a user name or password, or on a local or private network is rejected before anything is sent.</p>
 <p><b>Format</b> is PNG or JPEG. With <b>Full page</b>, the whole scrollable page is captured, up to <b>Max height</b>; otherwise the visible viewport is. <b>Width</b> (100 to 8000), <b>Height</b> and <b>Max height</b> (100 to 20000) are in pixels. Left empty, Site-Shot uses 1024, 768 and 20000.</p>
 <p>The node captures one page at a time. Messages that arrive meanwhile wait in order, up to 1000; further messages are rejected. A capture that gets no answer within 120 seconds fails; the <code>siteShotScreenshotTimeout</code> runtime setting changes this limit, in milliseconds. A screenshot larger than 64 MiB is rejected.</p>
@@ -141,11 +141,11 @@
     <dt>SITE_SHOT_HTTP_401</dt>
     <dd>Site-Shot did not accept the API key.</dd>
     <dt>SITE_SHOT_HTTP_403</dt>
-    <dd>the plan is inactive or out of captures, no capture worker is free, or the address is not allowed.</dd>
+    <dd>the plan is inactive, the month's captures are spent, or the address is not allowed. A free plan whose 100 captures are spent gets this answer until the allowance renews (it renews every month), or until a paid plan is bought for the account.</dd>
     <dt>SITE_SHOT_HTTP_404</dt>
     <dd>the page could not be captured; the placeholder image Site-Shot sends with this answer is discarded.</dd>
     <dt>SITE_SHOT_HTTP_429</dt>
-    <dd>the plan's limit of captures at the same time was reached, for example by other nodes or apps using the same key.</dd>
+    <dd>the plan's limit of captures at the same time was reached (one at a time on the free plan), for example by other nodes or apps using the same key. The refused request does not count.</dd>
     <dt>SITE_SHOT_HTTP_<i>status</i></dt>
     <dd>any other HTTP status, such as a server error or a redirect, which is not followed.</dd>
     <dt>SITE_SHOT_NOT_AN_IMAGE</dt>
@@ -165,7 +165,8 @@
 <p>The API key is sent only to <code>https://api.site-shot.com/</code>, as the <code>userkey</code> query parameter that the capture API requires. Error messages and the node status never include it.</p>
 <h3>References</h3>
 <ul>
-    <li><a href="https://www.site-shot.com/">Site-Shot</a> - plans and API keys</li>
+    <li><a href="https://www.site-shot.com/start/">Get an API key</a> - the free plan includes 100 captures a month</li>
+    <li><a href="https://www.site-shot.com/pricing/">Plans and prices</a></li>
     <li><a href="https://www.site-shot.com/openapi-capture.json">Capture API description</a> (OpenAPI)</li>
 </ul>
 </script>
